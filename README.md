@@ -38,7 +38,7 @@ def do_something_to_graph(g: Graph[GraphData["name": str]])
 # type(g.graph["name"]) == str must be True
 ```
 
-### Type-Hinting Graph Attributes `NodeData`
+### Type-Hinting Node Attributes `NodeData`
 
 ```python
 from graphtype import Graph, NodeData
@@ -55,7 +55,7 @@ def do_something_to_graph(g: Graph[NodeData["feature": np.ndarray]])
 #   type(d["feature"]) == np.ndarray must be True
 ```
 
-### Type-Hinting Graph Attributes `NodeData`
+### Type-Hinting Edge Attributes `EdgeData`
 
 ```python
 from graphtype import Graph, EdgeData
