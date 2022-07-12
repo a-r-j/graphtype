@@ -30,7 +30,7 @@ from graphtype import Graph, GraphData
 def do_something_to_graph(g: Graph[GraphData["name"]])
     pass
 
-# Each node must have a "name" attribute
+# The graph must have a "name" attribute
 
 def do_something_to_graph(g: Graph[GraphData["name": str]])
     pass
