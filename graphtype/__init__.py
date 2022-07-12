@@ -1,3 +1,5 @@
+"""Modified from dataenforce: https://github.com/CedricFR/dataenforce"""
+
 import inspect
 from functools import wraps
 from typing import Generic, _tp_cache, _TypingEmpty, get_type_hints
