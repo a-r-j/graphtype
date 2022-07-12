@@ -2,6 +2,12 @@
 
 Type hinting for networkx Graphs
 
+## Installation
+
+```python
+pip install graphtype
+```
+
 ## Usage
 
 There are two parts in graphtype: the type-hinting part, and the validation. You can use type-hinting with the provided class to indicate attributes graphs should possess, and the validation decorator to additionally ensure the format is respected in every function call.
