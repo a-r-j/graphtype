@@ -2,7 +2,7 @@
 
 import inspect
 from functools import wraps
-from typing import Generic, _tp_cache, _TypingEmpty, get_type_hints
+from typing import Generic, NewType, _tp_cache, _TypingEmpty, get_type_hints
 
 import networkx as nx
 import numpy as np
@@ -47,7 +47,6 @@ def validate(f):
                             f"{argument_name} is missing some graph attributes from {hint.graph_columns}"
                         )
                     if hint.graph_dtypes:
-                        # dtypes = dict(value.graph.dtypes)
                         dtypes = {k: type(v) for k, v in value.graph.items()}
                         for colname, dt in hint.graph_dtypes.items():
                             if not np.issubdtype(dtypes[colname], np.dtype(dt)):
@@ -68,7 +67,6 @@ def validate(f):
                                 f"{argument_name} is missing some node attributes from {hint.node_columns} on node {n}"
                             )
                         if hint.node_dtypes:
-                            # dtypes = dict(value.graph.dtypes)
                             dtypes = {k: type(v) for k, v in d.items()}
                             for colname, dt in hint.node_dtypes.items():
                                 if not np.issubdtype(dtypes[colname], np.dtype(dt)):
@@ -93,7 +91,6 @@ def validate(f):
                                 f"{argument_name} is missing some edge attributes from {hint.edge_columns} on edge {u}-{v}"
                             )
                         if hint.edge_dtypes:
-                            # dtypes = dict(value.graph.dtypes)
                             dtypes = {k: type(v) for k, v in d.items()}
                             for colname, dt in hint.edge_dtypes.items():
                                 if not np.issubdtype(dtypes[colname], np.dtype(dt)):
@@ -107,30 +104,40 @@ def validate(f):
     return wrapper
 
 
+def _resolve_type(t):
+    """Adapted from dataenforce contib by @martijnentink:
+    https://github.com/CedricFR/dataenforce/pull/5"""
+    # support for NewType in type hinting
+    if hasattr(t, "__supertype__"):
+        return _resolve_type(t.__supertype__)
+    # support for typing.List and typing.Dict
+    if hasattr(t, "__origin__"):
+        return _resolve_type(t.__origin__)
+    return t
+
+
 def _get_columns_dtypes(p):
     columns = set()
     dtypes = {}
-    #print(p, type(p))
     if isinstance(p, str):
         columns.add(p)
     elif isinstance(p, slice):
         columns.add(p.start)
-        if not inspect.isclass(p.stop):
+        stop_type = _resolve_type(p.stop)
+        if not inspect.isclass(stop_type):
             raise TypeError(
-                f"Column type hints must be classes, error with {repr(p.stop)}"
+                f"Column type hints must be classes, error with {repr(stop_type)}"
             )
-        dtypes[p.start] = p.stop
+        dtypes[p.start] = stop_type
     elif isinstance(p, (list, set)):
         for el in p:
             subcolumns, subdtypes = _get_columns_dtypes(el)
             columns |= subcolumns
             dtypes.update(subdtypes)
     elif isinstance(p, DataMeta):
-        # print("PPP")
         columns |= _get_columns_dtypes(p)[0]
         dtypes.update(_get_columns_dtypes(p)[1])
     else:
-        #print(p, type(p))
         raise TypeError(
             "Dataset[col1, col2, ...]: each col must be a string, list or set."
         )
@@ -193,13 +200,9 @@ class DataMeta(GenericMeta):
         if parameters == ():
             return super().__getitem__((_TypingEmpty,))
 
-        # print(type(parameters))
         if not isinstance(parameters, tuple):
             parameters = (parameters,)
         parameters = list(parameters)
-
-        # if not isinstance(parameters, slice):
-        #
 
         only_specified = True
         if parameters[-1] is ...:
