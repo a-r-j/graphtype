@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="graphtype",
-    version="0.0.1",
+    version="0.1.0",
     author="Arian Jamasb",
     author_email="arian@jamasb.io",
     description="Enforce graph, node and edge attribute types on NetworkX Graphs.",
@@ -16,6 +16,6 @@ setuptools.setup(
     classifiers=[
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent",
-        "License :: OSI Approved :: Apache Software License"
+        "License :: OSI Approved :: Apache Software License",
     ],
 )
